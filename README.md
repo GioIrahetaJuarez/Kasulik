@@ -1,4 +1,4 @@
-I built this React demo to quickly show how the performance of your site could be improved upon a small change in lazy loading.
+I built this React demo to quickly show how the performance of your site could be potentially improved upon a small change in lazy loading in order to improve the Largest ContenFul Paint.
 
 ## Run locally
 
