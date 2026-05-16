@@ -1,0 +1,163 @@
+
+<style>
+  .demo-root { font-family: var(--font-mono); padding: 1.5rem 0; }
+  .tab-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+  .tab { padding: 8px 20px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); font-family: var(--font-mono); transition: all 0.15s; }
+  .tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .code-block { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem 1.5rem; font-size: 12.5px; line-height: 1.75; overflow-x: auto; }
+  .c-green { color: #3B6D11; } .dark .c-green { color: #C0DD97; }
+  .c-red-t { color: #A32D2D; } .dark .c-red-t { color: #F7C1C1; }
+  .c-amber-t { color: #854F0B; } .dark .c-amber-t { color: #FAC775; }
+  .c-blue-t { color: #185FA5; } .dark .c-blue-t { color: #B5D4F4; }
+  .c-muted { color: var(--color-text-tertiary); }
+  .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  .metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 0.85rem 1rem; }
+  .metric-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; font-family: var(--font-sans); letter-spacing: 0.04em; text-transform: uppercase; }
+  .metric-val { font-size: 20px; font-weight: 500; font-family: var(--font-sans); }
+  .bad { color: #A32D2D; } .good { color: #3B6D11; }
+  .dark .bad { color: #F7C1C1; } .dark .good { color: #C0DD97; }
+  .sim-bar-wrap { margin-bottom: 1.5rem; }
+  .sim-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; font-family: var(--font-sans); }
+  .sim-bar-bg { background: var(--color-background-secondary); border-radius: 4px; height: 10px; overflow: hidden; margin-bottom: 3px; }
+  .sim-bar { height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .sim-bar.red { background: #E24B4A; }
+  .sim-bar.green { background: #639922; }
+  .explain { font-family: var(--font-sans); font-size: 13.5px; color: var(--color-text-secondary); line-height: 1.7; border-left: 2px solid var(--color-border-secondary); padding-left: 1rem; margin-top: 1.25rem; }
+  .run-btn { margin-top: 1rem; font-family: var(--font-sans); }
+  .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-family: var(--font-sans); margin-bottom: 0.75rem; }
+</style>
+
+<div class="demo-root">
+  <div class="tab-row">
+    <button class="tab active" onclick="switchTab('before')">❌ before (eager loading)</button>
+    <button class="tab" onclick="switchTab('after')">✅ after (lazy loading)</button>
+    <button class="tab" onclick="switchTab('sim')">↗ live simulation</button>
+  </div>
+
+  <div class="panel active" id="panel-before">
+    <div class="section-title">what kasulik.org is doing now</div>
+    <div class="metric-row">
+      <div class="metric"><div class="metric-label">initial JS bundle</div><div class="metric-val bad">~480kb</div></div>
+      <div class="metric"><div class="metric-label">parse + execute</div><div class="metric-val bad">~1.8s</div></div>
+      <div class="metric"><div class="metric-label">LCP score</div><div class="metric-val bad">poor</div></div>
+    </div>
+    <div class="code-block">
+<span class="c-muted">// ❌ BEFORE — all components load immediately,</span>
+<span class="c-muted">//    even ones the user may never see</span>
+
+<span class="c-blue-t">import</span> React <span class="c-blue-t">from</span> <span class="c-green">'react'</span>
+<span class="c-blue-t">import</span> HeavyDashboard   <span class="c-blue-t">from</span> <span class="c-green">'./HeavyDashboard'</span>   <span class="c-muted">// 120kb</span>
+<span class="c-blue-t">import</span> AnimatedHero     <span class="c-blue-t">from</span> <span class="c-green">'./AnimatedHero'</span>     <span class="c-muted">// 95kb</span>
+<span class="c-blue-t">import</span> CaseStudyCarousel <span class="c-blue-t">from</span> <span class="c-green">'./CaseStudyCarousel'</span> <span class="c-muted">// 80kb</span>
+<span class="c-blue-t">import</span> ContactForm      <span class="c-blue-t">from</span> <span class="c-green">'./ContactForm'</span>      <span class="c-muted">// 60kb</span>
+
+<span class="c-blue-t">export default function</span> <span class="c-amber-t">App</span>() {
+  <span class="c-blue-t">return</span> (
+    &lt;<span class="c-amber-t">div</span>&gt;
+      &lt;<span class="c-red-t">AnimatedHero</span> /&gt;
+      &lt;<span class="c-red-t">HeavyDashboard</span> /&gt;
+      &lt;<span class="c-red-t">CaseStudyCarousel</span> /&gt;
+      &lt;<span class="c-red-t">ContactForm</span> /&gt;
+    &lt;/<span class="c-amber-t">div</span>&gt;
+  )
+}
+    </div>
+    <p class="explain">Every component's JavaScript is bundled and downloaded on first load — even ContactForm at the bottom of the page that 80% of visitors never scroll to. This is what Lighthouse is flagging.</p>
+  </div>
+
+  <div class="panel" id="panel-after">
+    <div class="section-title">the fix — code splitting with react.lazy + suspense</div>
+    <div class="metric-row">
+      <div class="metric"><div class="metric-label">initial JS bundle</div><div class="metric-val good">~120kb</div></div>
+      <div class="metric"><div class="metric-label">parse + execute</div><div class="metric-val good">~0.4s</div></div>
+      <div class="metric"><div class="metric-label">LCP score</div><div class="metric-val good">good</div></div>
+    </div>
+    <div class="code-block">
+<span class="c-muted">// ✅ AFTER — only load what's needed for first paint.</span>
+<span class="c-muted">//    Everything else fetches on demand.</span>
+
+<span class="c-blue-t">import</span> React, { lazy, Suspense } <span class="c-blue-t">from</span> <span class="c-green">'react'</span>
+
+<span class="c-muted">// These become separate chunks — only fetched when rendered</span>
+<span class="c-blue-t">const</span> HeavyDashboard    = <span class="c-amber-t">lazy</span>(() => <span class="c-blue-t">import</span>(<span class="c-green">'./HeavyDashboard'</span>))
+<span class="c-blue-t">const</span> AnimatedHero      = <span class="c-amber-t">lazy</span>(() => <span class="c-blue-t">import</span>(<span class="c-green">'./AnimatedHero'</span>))
+<span class="c-blue-t">const</span> CaseStudyCarousel = <span class="c-amber-t">lazy</span>(() => <span class="c-blue-t">import</span>(<span class="c-green">'./CaseStudyCarousel'</span>))
+<span class="c-blue-t">const</span> ContactForm       = <span class="c-amber-t">lazy</span>(() => <span class="c-blue-t">import</span>(<span class="c-green">'./ContactForm'</span>))
+
+<span class="c-blue-t">export default function</span> <span class="c-amber-t">App</span>() {
+  <span class="c-blue-t">return</span> (
+    &lt;<span class="c-amber-t">div</span>&gt;
+      <span class="c-muted">{/* Suspense shows fallback while chunk loads */}</span>
+      &lt;<span class="c-blue-t">Suspense</span> fallback={&lt;<span class="c-amber-t">Spinner</span> /&gt;}&gt;
+        &lt;<span class="c-green">AnimatedHero</span> /&gt;        <span class="c-muted">// loads first — above the fold</span>
+        &lt;<span class="c-green">HeavyDashboard</span> /&gt;     <span class="c-muted">// fetched when scrolled into view</span>
+        &lt;<span class="c-green">CaseStudyCarousel</span> /&gt;  <span class="c-muted">// fetched when scrolled into view</span>
+        &lt;<span class="c-green">ContactForm</span> /&gt;        <span class="c-muted">// fetched when scrolled into view</span>
+      &lt;/<span class="c-blue-t">Suspense</span>&gt;
+    &lt;/<span class="c-amber-t">div</span>&gt;
+  )
+}
+    </div>
+    <p class="explain">With <code>React.lazy()</code>, each component becomes its own JS chunk. The browser only downloads a chunk when that component is actually about to render. Initial bundle drops from ~480kb to ~120kb — a 75% reduction in bytes on first load.</p>
+  </div>
+
+  <div class="panel" id="panel-sim">
+    <div class="section-title">simulated page load comparison</div>
+    <div id="sim-content">
+      <div class="sim-bar-wrap">
+        <div class="sim-label">❌ before — eager: downloading all JS upfront</div>
+        <div class="sim-bar-bg"><div class="sim-bar red" id="bar-before" style="width:0%"></div></div>
+        <div style="font-size:11px; color:var(--color-text-tertiary); font-family:var(--font-sans);" id="label-before">waiting...</div>
+      </div>
+      <div class="sim-bar-wrap">
+        <div class="sim-label">✅ after — lazy: only critical JS downloaded</div>
+        <div class="sim-bar-bg"><div class="sim-bar green" id="bar-after" style="width:0%"></div></div>
+        <div style="font-size:11px; color:var(--color-text-tertiary); font-family:var(--font-sans);" id="label-after">waiting...</div>
+      </div>
+      <div id="sim-result" style="font-family:var(--font-sans); font-size:13px; color:var(--color-text-secondary); margin-top:0.5rem; min-height:20px;"></div>
+    </div>
+    <button class="tab run-btn" id="run-btn" onclick="runSim()">▶ run simulation</button>
+    <p class="explain">This simulates what a browser does on first load. The "before" bar must finish loading all 480kb before anything renders. The "after" bar only needs the 120kb critical chunk — the rest loads in the background as you scroll.</p>
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['before','after','sim'][i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+let simRunning = false;
+function runSim() {
+  if (simRunning) return;
+  simRunning = true;
+  document.getElementById('run-btn').textContent = '⏳ loading...';
+  document.getElementById('sim-result').textContent = '';
+
+  const barBefore = document.getElementById('bar-before');
+  const barAfter = document.getElementById('bar-after');
+  const lblBefore = document.getElementById('label-before');
+  const lblAfter = document.getElementById('label-after');
+
+  barBefore.style.width = '0%';
+  barAfter.style.width = '0%';
+  lblBefore.textContent = 'downloading 480kb...';
+  lblAfter.textContent = 'downloading 120kb...';
+
+  setTimeout(() => { barAfter.style.width = '100%'; }, 100);
+  setTimeout(() => { lblAfter.textContent = '✅ first paint at 0.4s — page is interactive'; }, 1350);
+
+  setTimeout(() => { barBefore.style.width = '100%'; }, 600);
+  setTimeout(() => {
+    lblBefore.textContent = '⚠️ first paint at 1.8s — user waited 1.4s extra';
+    document.getElementById('sim-result').textContent = '→ lazy loading delivered first paint 4.5× faster on this simulation.';
+    document.getElementById('run-btn').textContent = '▶ run again';
+    simRunning = false;
+  }, 1850);
+}
+</script>

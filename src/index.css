@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#f8f7f4] text-[#201f1c] antialiased;
+  }
+}
+
+@layer components {
+  .tab-button {
+    @apply rounded-md border border-[#d7d2c8] px-5 py-2 font-mono text-[13px] text-[#666058] transition-colors;
+  }
+
+  .tab-button-active {
+    @apply border-[#a9a196] bg-[#efebe4] text-[#201f1c];
+  }
+
+  .metric-card {
+    @apply rounded-md bg-[#efebe4] px-4 py-3;
+  }
+
+  .metric-label {
+    @apply mb-1 font-sans text-[11px] uppercase tracking-[0.04em] text-[#666058];
+  }
+
+  .code-block {
+    @apply overflow-x-auto rounded-lg border border-[#d7d2c8] bg-[#efebe4] px-6 py-5 font-mono text-[12.5px] leading-7;
+  }
+}
